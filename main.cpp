@@ -14,7 +14,7 @@ void printarray(int *a, int n, const char *msg){
             printf("%i  ", a[i]);
         }
         printf("\n");
-        printf("\n");
+        //printf("\n");
     }
 }
 
@@ -71,24 +71,35 @@ double pointer_jumping_par(int *q, int n, int nt){
 
 	// paralelo
 	double tp1 = omp_get_wtime();
-	#pragma omp parallel shared(q,n,nt)
+	#pragma omp parallel shared(q)
 	{
-		//int c = 0;
-	
+		int c = 0;
 		int tid = omp_get_thread_num();
 		int segment = (n + nt -1)/nt;
 		int start = segment*tid;
 		int end = start + segment;
-
+		printf("seg %i, st %i, end %i\n",segment, start,end);
 		//#pragma omp parallel for shared(q)
+		//      [   t1        [ ]           [ ]           [ ]         ]
+		//      [ thread 1 ]  [ thread 2 ]  [ thread 3  ] [ thread 4  ] 
+		// i     0   1   2     3   4   5     6   7   8     9   10  11 
+		
+		// el    1   2   3     4   5   6     7   8   9     10  11  12 
+		
+		// p0    2   3   4     5   6   7     8   9   10    11  12  12
+		// p1    3   3   4     6   6   7     9   9   10    12  12  12
 		for(int k=start; k<end && k<n; ++k){
-			while(q[k] != q[ q[k] ]){
-				q[k] = q[ q[k] ]; 
+			int i=0;
+			while(q[i] != q[ q[i] ] && i!=end){
+				//printf("--> %i\n",k);
+				q[i] = q[ q[i] ];
+				i++;
 				//printf("--> %i\n",tid);
-				//printf("thread %i  it %i\n", tid, c++);
-				//#pragma omp barrier
+				//printf("thread %i  it %i  k %i\n", tid, c++,k);
+
 			}
-			//printf("  \n");
+			#pragma omp barrier
+			
 		}
   	}	
 	double tp2 = omp_get_wtime();
