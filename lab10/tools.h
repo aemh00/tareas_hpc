@@ -24,6 +24,7 @@ void print_mat(int *mat, int n){
 // ubicar cachorro
 void ubicar_lobito(int *mat, int n){
     int i = rand() % n;
+    while (i==0) {i = rand() % n;}
     int j = rand() % n;
     mat[i*n + j] = 1;
 }
@@ -32,7 +33,65 @@ void ubicar_manada_det(int *mat, int n, vector<pair<int,int>> &man){
     // dividir el dominio para k lobos
     // considerar particion 2D, factorizar k en dos valores 'similares'.
     // usar 'techo' y 'piso' de raiz de n para hacer particiones.
-     
+    int i;
+    int j = 0;
+    int lobos = man.size();
+    double num = n*1.0/lobos*1.0;
+    double entero, decimal;
+    decimal = modf(num,&entero);
+
+    if (n%lobos == 0){
+	    //int macrofilas = k;
+	    int fxl = n/lobos;
+	    for(int k=0; k<lobos; ++k){            
+		    // a cada lobo le asignamos n/k filas;
+		    i = k*fxl;
+		    mat[i*n + j] = 2;
+		    man[k] = {i,j};
+            }
+
+    }
+  
+    else {
+    //     asigno el numero entero de filas a c/lobo, excepto a uno que queda con +1 fila
+    	   int fxl = entero;
+	   int sobran = n%lobos;
+	   int n_sobran = 0;
+	   for(int k=0; k<lobos; ++k){            
+		    // a cada lobo le asignamos fxl filas;
+		    printf("sobran %i\n",n_sobran);
+		    if (k==0){
+			i = k*fxl;
+		    }
+		    else if (n_sobran<sobran){
+		    	i = k*fxl+n_sobran;
+		    	n_sobran++;
+		    }
+		    else{
+		        i = k*fxl+n_sobran;
+		    }
+		    mat[i*n + j] = 2;
+		    man[k] = {i,j};
+            }
+
+    }
+    //##################################################
+    // 2D
+    for (int i = 0; i<n; i++){
+	    if (i%2 == 0){
+		    // pa la derecha
+		    for (int j = 0; j<n; j++){
+			    //wiri
+		    }
+	    }
+	    else{
+		    // pa la izq
+		    for (int j = n; j>0; j--){
+			    //wiri
+		    }
+	    }
+    
+    } 
 }
 
 void ubicar_manada_nondet(int *mat, int n, vector<pair<int,int>> &man){
@@ -41,6 +100,7 @@ void ubicar_manada_nondet(int *mat, int n, vector<pair<int,int>> &man){
         // todos parten de un mismo lugar
         int i = rand() % n;
         int j = rand() % n;
+	// para que no aplasten al lobito
         while(mat[i*n + j] == 1){
             i = rand() % n;
             j = rand() % n;
