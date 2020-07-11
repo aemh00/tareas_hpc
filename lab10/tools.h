@@ -33,7 +33,7 @@ void ubicar_manada_det(int *mat, int n, vector<pair<int,int>> &man){
     // dividir el dominio para k lobos
     // considerar particion 2D, factorizar k en dos valores 'similares'.
     // usar 'techo' y 'piso' de raiz de n para hacer particiones.
-    int i;
+    int i = 0;
     int j = 0;
     int lobos = man.size();
     double num = n*n*1.0/lobos*1.0;
@@ -45,7 +45,7 @@ void ubicar_manada_det(int *mat, int n, vector<pair<int,int>> &man){
 	    int cxl = n*n/lobos;
 	    for(int k=0; k<lobos; ++k){            
 		    // a cada lobo le asignamos n/k filas;
-		    j = k*fxl;
+		    j = k*cxl;
 		    // revisar condiciones de borde
 		    mat[i*n + j] = 2;
 		    man[k] = {i,j};
@@ -56,20 +56,20 @@ void ubicar_manada_det(int *mat, int n, vector<pair<int,int>> &man){
     else {
     //     asigno el numero entero de filas a c/lobo, excepto a uno que queda con +1 fila
     	   int fxl = entero;
-	   int sobran = n%lobos;
+	   int sobran = n*n%lobos;
 	   int n_sobran = 0;
 	   for(int k=0; k<lobos; ++k){            
 		    // a cada lobo le asignamos fxl filas;
 		    printf("sobran %i\n",n_sobran);
 		    if (k==0){
-			i = k*fxl;
+			j = k*fxl;
 		    }
 		    else if (n_sobran<sobran){
-		    	i = k*fxl+n_sobran;
+		    	j = k*fxl+n_sobran;
 		    	n_sobran++;
 		    }
 		    else{
-		        i = k*fxl+n_sobran;
+		        j = k*fxl+n_sobran;
 		    }
 		    mat[i*n + j] = 2;
 		    man[k] = {i,j};
