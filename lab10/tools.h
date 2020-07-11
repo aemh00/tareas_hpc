@@ -36,16 +36,17 @@ void ubicar_manada_det(int *mat, int n, vector<pair<int,int>> &man){
     int i;
     int j = 0;
     int lobos = man.size();
-    double num = n*1.0/lobos*1.0;
+    double num = n*n*1.0/lobos*1.0;
     double entero, decimal;
     decimal = modf(num,&entero);
 
-    if (n%lobos == 0){
+    if ((n*n)%lobos == 0){
 	    //int macrofilas = k;
-	    int fxl = n/lobos;
+	    int cxl = n*n/lobos;
 	    for(int k=0; k<lobos; ++k){            
 		    // a cada lobo le asignamos n/k filas;
-		    i = k*fxl;
+		    j = k*fxl;
+		    // revisar condiciones de borde
 		    mat[i*n + j] = 2;
 		    man[k] = {i,j};
             }
@@ -77,21 +78,28 @@ void ubicar_manada_det(int *mat, int n, vector<pair<int,int>> &man){
     }
     //##################################################
     // 2D
-    for (int i = 0; i<n; i++){
-	    if (i%2 == 0){
-		    // pa la derecha
-		    for (int j = 0; j<n; j++){
-			    //wiri
-		    }
-	    }
-	    else{
-		    // pa la izq
-		    for (int j = n; j>0; j--){
-			    //wiri
-		    }
-	    }
-    
-    } 
+    for (int k = 0; k<lobos; k++){
+	    //calcular indices 
+	    //
+	    //
+
+//	    for (int i = 0; i<n; i++){
+//		    if (i%2 == 0){
+//			    // pa la derecha
+//			    for (int j = 0; j<n; j++){
+//				    //wiri
+//			    }
+//		    }
+//		    else{
+//			    // pa la izq
+//			    for (int j = n; j>0; j--){
+//				    //wiri
+//			    }
+//		    }
+//	    
+//	    } 
+    }
+
 }
 
 void ubicar_manada_nondet(int *mat, int n, vector<pair<int,int>> &man){
