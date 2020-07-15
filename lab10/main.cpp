@@ -13,7 +13,7 @@ bool isPowerOfTwo(int x){
 int main(int argc, char **argv){
     // (1) argumentos  ./prog n k m
     if(argc != 4){
-        fprintf(stderr, "run as ./prog n=size k=wolves m=mode\n n potencia de dos\nk divisor de n & k potencia de 2\nmode : {'determinist':0,'random_walk':1}\n");
+        fprintf(stderr, "run as ./prog n=size k=wolves m=mode\n n potencia de dos\nk divisor de n*n & k potencia de 2\nmode : {'determinist':0,'random_walk':1}\n");
         exit(EXIT_FAILURE);
     }
     int n = atoi(argv[1]);
@@ -40,8 +40,9 @@ int main(int argc, char **argv){
 
     // (3) ubicar manada
     vector<pair<int, int>> manada(k);
+    int a,b;
     if(m == 0){
-        ubicar_manada_det(mat, n, manada);
+        ubicar_manada_det(mat, n, manada,a,b);
     }
     else if(m == 1){
         ubicar_manada_nondet(mat, n, manada);
@@ -50,16 +51,22 @@ int main(int argc, char **argv){
     ubicar_lobito(mat, n);
 
 
-    print_mat(mat, n);
-    getchar();
+    //print_mat(mat, n);
+    //getchar();
+    pair<int,int> p;
 
     // (5) proceso de busqueda
+    
+    double t1 = omp_get_wtime();
     if(m ==0){
-        //pair<int,int> p = busqueda_det(mat, n, manada);
+        p = busqueda_det(mat, n, manada, a, b);
     }
     else if(m == 1){
-        pair<int,int> p = busqueda_nodet(mat, n, manada);
+        p = busqueda_nodet(mat, n, manada);
     }
+    double t2 = omp_get_wtime();
+    double tf = t2-t1;
+    printf("\nLobito encontrado en (%i,%i)\n t = %lf\n",p.first, p.second,tf);
     return EXIT_SUCCESS;
 }
 
