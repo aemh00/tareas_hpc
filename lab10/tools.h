@@ -136,21 +136,12 @@ void ubicar_manada_nondet(int *mat, int n, vector<pair<int,int>> &man){
         // todos parten de un mismo lugar
         //int i = rand() % n;
         //int j = rand() % n;
-	// para que no aplasten al lobito
-        //while(mat[i*n + j] == 1){
-        //    i = rand() % n;
-        //    j = rand() % n;
-        //}
         //mat[i*n + j] = 2;
         // inicializar la manada con (i,j)
         for(int k=0; k<man.size(); ++k){
             // cada lobo parte en distinto lugar
             int i = rand() % n;
             int j = rand() % n;
-            while(mat[i*n + j] == 1){
-                i = rand() % n;
-                j = rand() % n;
-            }
             mat[i*n + j] = 2;
             man[k] = {i,j};
         }
@@ -158,45 +149,62 @@ void ubicar_manada_nondet(int *mat, int n, vector<pair<int,int>> &man){
 }
 
 // busqueda deterministica 
+// paralelizar con OMP
+// un lobo por hilo
+// si hay mas lobos que hilos, los lobos "esperan" por un hilo libre.
+// #pragma omp parallel shared(m,perdido)
+// asignar un k distinto para cada hilo
 std::pair<int, int> busqueda_det(int *mat, int n, vector<pair<int,int>> &m, int a, int b){
     int perdido = 1;
-    // while (no encontrado)
+    int lobos = m.size();
+    // K = [0,1,2,3]
+    // r = [0,0]
+    int rec[lobos] = {0};
     int i,j;
-    //printf("llegan a = %i, b = %i\n",a,b);
-    while(perdido){
-        // un paso de busqueda
-        for(int k=0; k<m.size(); ++k){
-            mat[m[k].first*n + m[k].second] = 0;
-	    i = m[k].first;
-	    j = m[k].second;
-	    if (i%2 ==0){ //me muevo pa la derecha (j+1)
-		    if (j%a < a-1){ j+=1; }
-		    else{ i+=1; }
+    #pragma omp parallel shared(mat,m,perdido,rec)
+    {
+	    int tid = omp_get_thread_num();
+	    int k = rand() % lobos;
+	    //while (rec[k] == 1) { k = rand() % lobos;}
+            //#pragma omp barrier
+
+	    // while (no encontrado)
+	    
+	    //printf("llegan a = %i, b = %i\n",a,b);
+	    while(perdido){
+		    while (rec[k]==0){
+		// un paso de busqueda
+		//for(int k=0; k<lobos; ++k){
+			    i = m[k].first;
+			    j = m[k].second; 
+			    mat[i*n + j] = 0;
+			    if (i%2 ==0){ //me muevo pa la derecha (j+1)
+				    if (j%a < a-1){ j+=1; }
+				    else{ i+=1; }
+			    }
+			    else{ // memuevo pa la izq (j-1)
+				    if (j%a > 0){ j-=1; }
+				    else if (i%b < b-1){ i+=1; }
+				    else { rec[k] = 1;}
+			    }
+			    //preguntar si encontré el lobito
+			    if (mat[i*n + j] == 1){
+				    // pillao
+				    perdido = 0;
+			    }
+			    else {
+				    m[k] = {i,j};
+				    mat[i*n + j] = 2;
+			    }
+		    }
+		    k = rand() % lobos;
+
+		//}
+		#ifdef DEBUG
+		    print_mat(mat, n);
+		    getchar();
+		#endif
 	    }
-	    else{ // memuevo pa la izq (j-1)
-		    if (j%a > 0){ j-=1; }
-		    else if (i%b < b-1){ i+=1; }
-	    }
-	    // si el J tiene espacio pal lao en el sub bloque, entonces se mueve
-            //j = (m[k].second + 1);
-	    // si llego al final el J. Si el i tiene espacio para abajo, se mueve
-	    //y el i aumenta a la siguiente fila.
-            //i = (m[k].first + 1);
-	    //preguntar si encontré el lobito
-            if (mat[i*n + j] == 1){
-		    // pillao
-		    perdido = 0;
-		    k = m.size();
-	    }
-	    else {
-		    m[k] = {i,j};
-		    mat[i*n + j] = 2;
-	    }
-        }
-        #ifdef DEBUG
-            print_mat(mat, n);
-            getchar();
-        #endif
     }
     return {i,j};
 
