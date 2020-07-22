@@ -1,6 +1,21 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 using namespace std;
+// mersenne_twister_engine::operator()
+#include <iostream>
+#include <chrono>
+#include <random>
+int random_weno(int k){
+  // obtain a seed from the system clock:
+  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::mt19937 generator (seed);  // mt19937 is a standard mersenne_twister_engine
+  std::uniform_int_distribution<uint32_t> uint_dist_k(0,k);
+  //std::cout << "Random value: " << generator() << std::endl;
+  int rnd = uint_dist_k(generator);
+  //printf("rnd weno = %i\n",rnd);
+  return rnd;
+}
+
 const char sym[3] = {'.', '@', 'L'};
 void init_mat_const(int *mat, int n, int c){
     #pragma omp parallel for
@@ -164,7 +179,9 @@ std::pair<int, int> busqueda_det(int *mat, int n, vector<pair<int,int>> &m, int 
     #pragma omp parallel shared(mat,m,perdido,rec)
     {
 	    int tid = omp_get_thread_num();
+	    //int k = random_weno(lobos);
 	    int k = rand() % lobos;
+	    //printf("k = %i\n",k);
 	    //while (rec[k] == 1) { k = rand() % lobos;}
             //#pragma omp barrier
 
@@ -197,6 +214,7 @@ std::pair<int, int> busqueda_det(int *mat, int n, vector<pair<int,int>> &m, int 
 				    mat[i*n + j] = 2;
 			    }
 		    }
+		    //k = random_weno(lobos);
 		    k = rand() % lobos;
 
 		//}
