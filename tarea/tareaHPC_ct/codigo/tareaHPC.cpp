@@ -1,0 +1,220 @@
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <random>
+#include <bits/random.h>
+#include <time.h>       /* clock_t, clock, CLOCKS_PER_SEC */
+#include "include/BasicCDS.h"
+
+using namespace std;
+using namespace cds;
+
+#define PRINT 0
+#define TEST 0
+
+uint bM; // bits for MAX	
+
+// Structure with all globals parameters program
+typedef struct {
+	ulong *A;
+	ulong *X;
+	ulong n;
+	ulong MAX;
+
+	ulong sizeA, sizeX;
+	ulong nWX;		// number of Words for X[]
+} ParProg;
+
+void genArrays(ParProg *par);
+int partition_A(ulong *A, ulong l, ulong r);
+void quickSort_A(ulong *A, ulong l, ulong r);
+int partition_B(ulong *X, ulong l, ulong r, uint bM);
+void quickSort_B(ulong *X, ulong l, ulong r, uint bM);
+
+
+int main(int argc, char** argv){
+	ParProg *par = new ParProg();
+	clock_t t1,t2,tA,tB;
+	float timeA, timeB;
+
+	if(argc != 3){
+		cout << "Execution Error! call: ./tareaHPC n MAX" << endl;
+		exit(EXIT_FAILURE);
+	}
+	par->n = atoi(argv[1]);
+	par->MAX = atoi(argv[2]);
+	/*
+	cout << "Parameters..." << endl;
+	cout << "n = " << par->n << endl;
+	cout << "MAX = " << par->MAX << endl;
+	*/
+
+	genArrays(par);
+	cout << "################## " << endl;
+	t1 = clock();
+	quickSort_A(par->A, 0, par->n-1);
+	tA = clock() - t1;
+	t2 = clock();
+	quickSort_B(par->X, 0, par->n-1, bM);
+	tB = clock() - t2;
+	timeA = ((float)tA/CLOCKS_PER_SEC)*1000.0;
+	timeB = ((float)tB/CLOCKS_PER_SEC)*1000.0;
+
+	ulong i;
+	if(par->n <= 32){
+		cout << "A[]* = ";
+		for (i=0; i<par->n; i++)
+			cout << par->A[i] << " ";
+		cout << endl;
+
+		ulong j;
+		cout << "B[]* = ";
+		for (i=j=0; i<par->n; i++, j+=bM){
+				cout << getNum64(par->X, j, bM) << " ";
+			}
+		cout << endl;
+	}
+	cout << "Tiempo A = "<< timeA << " ms" << endl;
+	cout << "Tiempo B = "<< timeB << " ms" << endl;
+
+	return 0;
+}
+
+
+// generate X nondecreasing array, PATT array for experiments and sample array for bSearch
+void genArrays(ParProg *par){
+	ulong i, j, k;
+
+	par->A = new ulong[par->n];
+	par->sizeA = par->n*sizeof(ulong);
+	for (i=0; i<par->n; i++)
+		par->A[i] = rand()%par->MAX;
+
+	// **************************************************************************
+	// create X[] array...
+	bM = 1+log2(par->MAX);
+	par->nWX = (par->n*bM)/(sizeof(ulong)*8);
+	if ((par->n*bM)%(sizeof(ulong)*8)>0)
+		par->nWX++;
+
+	par->X = new ulong[par->nWX];
+	par->sizeX = par->nWX*sizeof(ulong);
+
+	//cout << "bM = " << bM << endl;
+    	//cout << "nWX = " << par->nWX << endl;
+	cout << "size for A[] = " << par->sizeA/(1024.0*1024.0) << " MiB" << endl;
+	cout << "size for B[] = " << par->sizeX/(1024.0*1024.0) << " MiB" << endl;
+
+	// store values from A[] to X[] (calling the method setNum64())...
+	for (i=j=0; i<par->n; i++, j+=bM)
+		setNum64(par->X, j, bM, par->A[i]);
+
+	if (PRINT){
+		cout << "A[] = ";
+		for (i=0; i<par->n; i++)
+			cout << par->A[i] << " ";
+		cout << endl;
+
+		cout << "B[] = ";
+		//read values from X[]...
+		for (i=j=0; i<par->n; i++, j+=bM){
+			cout << getNum64(par->X, j, bM) << " ";
+		}
+		cout << endl;
+
+		// print bits using printBitsUlong()...
+	}
+
+	if(TEST){
+		// check all the position A[i] == X[i]...
+		for (i=j=0; i<par->n; i++, j+=bM){
+			k = getNum64(par->X, j, bM);
+			if (k!=par->A[i]){
+				cout << "ERROR. A[" <<i<< "] = " << par->A[i] << " != X[i] = " << k << endl;
+				exit(-1);
+			}
+		}
+
+		cout << "Test OK !!" << endl;
+	}
+}
+
+// realiza la particion de A[l..r] retornando la posision de la particion t,
+// dejando A tal que todo elemento en A[l..t-1] < A[t] <= A[t+1...r]
+int partition_A(ulong *A, ulong l, ulong r){
+	uint i, pv, p;
+	p = l;
+	pv = A[p];
+	for(i=l; i<=r; i++){
+		if (A[i] < pv){
+			swap(A[i], A[p+1]);
+			p++;
+		}
+	}
+	swap(A[l], A[p]);
+
+	return p;
+}
+
+// ordena los elementos de A con el algoritmo quickSort
+void quickSort_A(ulong *A, ulong l, ulong r){
+	if (l<r){
+    	uint p = partition_A(A, l, r);
+    	if (p){
+        	quickSort_A(A, l, p-1); // de la mitad hacia la izquierda
+        	quickSort_A(A, p+1, r); // de la mitad hacia la derecha 
+        }
+    }
+
+ }
+
+// ordena los elementos de X con el algoritmo quickSort
+int partition_B(ulong *X, ulong l, ulong r, uint bM){
+	uint i, pv, p, k, h;
+	p = l;
+	pv = getNum64(X, p*bM, bM);
+	//cout << "pv= "<<pv<< "l= " <<l<< "p= "<<p << endl;
+	for(i=l; i<=r; i++){
+		//cout << "i= " <<i << endl;
+		k = getNum64(X, i*bM, bM);
+		//cout << "k= " <<k << endl;
+		if (k < pv){
+			h = getNum64(X, (p+1)*bM, bM);
+			//cout << "h= " <<h << endl;
+			//swap(X[i], X[p+1]);
+			setNum64(X, (p+1)*bM, bM, k);
+			setNum64(X, i*bM, bM, h);
+			p++;
+			//cout << "p= " <<p << endl;
+		}	
+	}
+
+	h = getNum64(X, p*bM, bM);
+	//swap(X[l], X[p]);
+	setNum64(X, p*bM, bM, pv);
+	setNum64(X, l*bM, bM, h);
+
+	return p;
+}
+
+void quickSort_B(ulong *X, ulong l, ulong r, uint bM){
+	if (l<r){
+    	uint p = partition_B(X, l, r, bM);
+    	if (p){
+        	quickSort_B(X, l, p-1, bM);
+        	quickSort_B(X, p+1, r, bM);
+        }
+    }
+
+}
+
+
+/*for (i=j=0; i<par->n; i++, j+=bM){
+			cout << getNum64(par->X, j, bM) << " ";
+		}
+
+for (i=j=0; i<par->n; i++, j+=bM)
+		setNum64(X, j, bM, X[i]);*/
