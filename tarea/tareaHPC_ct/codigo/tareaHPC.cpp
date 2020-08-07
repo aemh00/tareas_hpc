@@ -36,7 +36,7 @@ int partition_A(ulong *A, ulong l, ulong r);
 void quickSort_A(ulong *A, ulong l, ulong r);
 int partition_B(ulong *X, ulong l, ulong r, uint bM);
 void quickSort_B(ulong *X, ulong l, ulong r, uint bM);
-
+void swap64(ulong *A, uint posX, uint posY, uint bM);
 
 int main(int argc, char** argv){
 	ParProg *par = new ParProg();
@@ -204,6 +204,13 @@ void genArrays(ParProg *par){
 	}
 }
 
+void swap64(ulong *A, uint posX, uint posY, uint bM){
+	uint auxX = getNum64(A, posX*bM, bM);
+	uint auxY = getNum64(A, posY*bM, bM);
+	setNum64(A, posY*bM, bM, auxX);
+	setNum64(A, posX*bM, bM, auxY);
+}
+
 // realiza la particion de A[l..r] retornando la posision de la particion t,
 // dejando A tal que todo elemento en A[l..t-1] < A[t] <= A[t+1...r]
 int partition_A(ulong *A, ulong l, ulong r){
@@ -224,53 +231,38 @@ int partition_A(ulong *A, ulong l, ulong r){
 // ordena los elementos de A con el algoritmo quickSort
 void quickSort_A(ulong *A, ulong l, ulong r){
 	if (l<r){
-    	uint p = partition_A(A, l, r);
-    	if (p){
-        	quickSort_A(A, l, p-1); // de la mitad hacia la izquierda
-        	quickSort_A(A, p+1, r); // de la mitad hacia la derecha 
-        }
-    }
-
- }
+		uint p = partition_A(A, l, r);
+		if (p){
+			quickSort_A(A, l, p-1); // de la mitad hacia la izquierda
+			quickSort_A(A, p+1, r); // de la mitad hacia la derecha 
+		}
+   	}
+}
 
 // ordena los elementos de X con el algoritmo quickSort
 int partition_B(ulong *X, ulong l, ulong r, uint bM){
-	uint i, pv, p, k, h;
+	uint i, pv, p, k;
 	p = l;
 	pv = getNum64(X, p*bM, bM);
-	//cout << "pv= "<<pv<< "l= " <<l<< "p= "<<p << endl;
 	for(i=l; i<=r; i++){
-		//cout << "i= " <<i << endl;
 		k = getNum64(X, i*bM, bM);
-		//cout << "k= " <<k << endl;
 		if (k < pv){
-			h = getNum64(X, (p+1)*bM, bM);
-			//cout << "h= " <<h << endl;
-			//swap(X[i], X[p+1]);
-			setNum64(X, (p+1)*bM, bM, k);
-			setNum64(X, i*bM, bM, h);
+			swap64(X, i, p+1,bM);
 			p++;
-			//cout << "p= " <<p << endl;
 		}	
 	}
-
-	h = getNum64(X, p*bM, bM);
-	//swap(X[l], X[p]);
-	setNum64(X, p*bM, bM, pv);
-	setNum64(X, l*bM, bM, h);
-
+	swap64(X, l, p,bM);
 	return p;
 }
 
 void quickSort_B(ulong *X, ulong l, ulong r, uint bM){
 	if (l<r){
-    	uint p = partition_B(X, l, r, bM);
-    	if (p){
-        	quickSort_B(X, l, p-1, bM);
-        	quickSort_B(X, p+1, r, bM);
-        }
-    }
-
+		uint p = partition_B(X, l, r, bM);
+		if (p){
+			quickSort_B(X, l, p-1, bM);
+			quickSort_B(X, p+1, r, bM);
+		}
+	}
 }
 
 
