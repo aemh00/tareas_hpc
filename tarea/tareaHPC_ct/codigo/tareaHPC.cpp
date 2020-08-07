@@ -100,7 +100,7 @@ void runQSAB(ParProg *par){
 	clock_t t;
 
 	cout << "_________________________________________________" << endl;
-	cout << "  Executing " << REPET << " QuickSort on A[] and B[]" << endl;
+	cout << "  Executing " << REPET << " QuickSort on A[] and B[] with n = " << par->n << endl;
 
 	for (k=0; k<REPET; k++){
 		// generar arreglos A y B
@@ -127,7 +127,7 @@ void runQSAB(ParProg *par){
 	cout << "Resume File: " << aFile << endl;
 
 	FILE *fp = fopen(aFile, "a+" );
-	// [n] [REPET] [avg bs-time/exec]
+	// [n] [REPET] [avg QS-time/exec]
 	fprintf(fp, "%ld %d %f\n", par->n, REPET, (tA*1000000.0)/REPET);
 	fclose(fp);
 	
@@ -140,7 +140,7 @@ void runQSAB(ParProg *par){
 	cout << "Resume File: " << bFile << endl;
 
 	FILE *fq = fopen(bFile, "a+" );
-	// [n] [REPET] [avg bs-time/exec]
+	// [n] [REPET] [avg QS-time/exec]
 	fprintf(fq, "%ld %d %f\n", par->n, REPET, (tB*1000000.0)/REPET);
 	fclose(fq);
 
@@ -149,6 +149,9 @@ void runQSAB(ParProg *par){
 // generate X nondecreasing array, PATT array for experiments and sample array for bSearch
 void genArrays(ParProg *par){
 	ulong i, j, k;
+	srand(time(0));
+	char aFile[400];
+
 
 	par->A = new ulong[par->n];
 	par->sizeA = par->n*sizeof(ulong);
@@ -169,6 +172,17 @@ void genArrays(ParProg *par){
     	//cout << "nWX = " << par->nWX << endl;
 	cout << "size for A[] = " << par->sizeA/(1024.0*1024.0) << " MiB" << endl;
 	cout << "size for B[] = " << par->sizeX/(1024.0*1024.0) << " MiB" << endl;
+
+	// save mem size to File
+	strcpy(aFile, par->prefixResult);
+	strcat(aFile, "QSmem");
+	//cout << "Resume File: " << aFile << endl;
+
+	FILE *fp = fopen(aFile, "a+" );
+	// [n] [REPET] [avg QS-time/exec]
+	fprintf(fp, "%ld %d %f %f\n", par->n, REPET, par->sizeA/(1024.0*1024.0), par->sizeX/(1024.0*1024.0));
+	fclose(fp);
+
 
 	// store values from A[] to X[] (calling the method setNum64())...
 	for (i=j=0; i<par->n; i++, j+=bM)
