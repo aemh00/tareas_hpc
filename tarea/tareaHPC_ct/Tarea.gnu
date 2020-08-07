@@ -11,6 +11,6 @@ set grid ytics lc rgb "#bbbbbb" lw 1 lt 0
 set grid xtics lc rgb "#bbbbbb" lw 1 lt 0
 set key left
 plot [] [] \
-	'./results/quickSort_A' using 1:3 title "bs" with linespoints lt -1 pt 7 lw 0.5, \
-	'./results/quickSort_B' using 1:3 title "bs-Opt" with linespoints lt -1 pt 3 lw 0.5 lc rgb '#DC143C',\
-	
+	'./results/QSA' using 1:3 title "QuickSort-A" with linespoints lt -1 pt 7 lw 0.5, \
+	'./results/QSB' using 1:3 title "QuickSort-B" with linespoints lt -1 pt 3 lw 0.5 lc rgb '#DC143C',\
+

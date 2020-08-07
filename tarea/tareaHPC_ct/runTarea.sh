@@ -1,11 +1,11 @@
 runTarea.sh
 
-./x/y  10000 50  ./results/ 0
-./x/y  20000 50  ./results/ 0
-./x/y  40000 50  ./results/ 0
-./x/y  60000 50  ./results/ 0
-./x/y  80000 50  ./results/ 0
-./x/y  100000 50  ./results/ 0
+./codigo/tareaHPC 1024 50 ./results/
+./codigo/tareaHPC 2048 50 ./results/
+./codigo/tareaHPC $((1024*4)) 50 ./results/
+./codigo/tareaHPC $((1024*8)) 50 ./results/
+./codigo/tareaHPC $((1024*16)) 50 ./results/
+./codigo/tareaHPC $((1024*32)) 50 ./results/
 
 gnuplot ./Tarea.gnu
 
