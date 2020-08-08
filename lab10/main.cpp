@@ -11,9 +11,9 @@ bool isPowerOfTwo(int x){
 }
 
 int main(int argc, char **argv){
-    // (1) argumentos  ./prog n k m
-    if(argc != 4){
-        fprintf(stderr, "run as ./prog n=size k=wolves m=mode\n n potencia de dos\nk divisor de n*n & k potencia de 2\nmode : {'determinist':0,'random_walk':1}\n");
+    // (1) argumentos  ./prog n k m nt
+    if(argc != 5){
+        fprintf(stderr, "run as ./prog n=size k=wolves m=mode nt=threads\n n potencia de dos\nk divisor de n*n & k potencia de 2\nmode : {'determinist':0,'random_walk':1}\n ");
         exit(EXIT_FAILURE);
     }
     int n = atoi(argv[1]);
@@ -32,6 +32,12 @@ int main(int argc, char **argv){
 	    printf("\nReingrese m: [0,1] ");
 	    scanf("%d",&m);
     }
+    int nt = atoi(argv[4]);
+    while (nt > k){
+	    printf("Reingrese nt: nt <= %i \n",k);
+	    scanf("%d",&nt);
+    }
+    omp_set_num_threads(nt);
     // (2) crear e iniciar dominio n x n
     int *mat = new int[n * n];
     init_mat_const(mat, n, 0);
@@ -66,7 +72,7 @@ int main(int argc, char **argv){
     }
     double t2 = omp_get_wtime();
     double tf = t2-t1;
-    printf("\nLobito encontrado en (%i,%i)\n t = %lf\n",p.first, p.second,tf);
+    printf("Lobito encontrado en (%i,%i)\n t = %lf\n",p.first, p.second,tf);
     return EXIT_SUCCESS;
 }
 
