@@ -71,7 +71,7 @@ void fft_recursive(TYPE* x, TYPE* X_real, TYPE* X_imag, int N, int nt) {
             // numero de hilo ??
             int tid = omp_get_thread_num();
             // obtener segmentos para cada hilo
-            int segment = (N + nt-1)/nt;
+            int segment = (N/2 + nt-1)/nt;
             int start = segment*tid;
             int end = start + segment;
             //#pragma omp parallel for shared(x_even, x_odd, X_real_even,X_imag_even, X_real_odd, X_imag_even)
